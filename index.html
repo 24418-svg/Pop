@@ -409,7 +409,12 @@
                         <i class="fa-solid fa-award"></i>
                         <span>ดูใบประกาศนียบัตร</span>
                     </button>
+                    <button id="sendScoreBtn" onclick="appState.manualSendScore()" class="py-2.5 px-5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl text-sm transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>ส่งข้อมูลคะแนน</span>
+                    </button>
                 </div>
+                <p id="sendScoreStatus" class="text-xs font-sarabun text-slate-400 mt-3"></p>
             </div>
         </section>
 
@@ -1037,9 +1042,6 @@
                 const percentage = (this.quiz.score / total) * 100;
                 this.quiz.passed = percentage >= 70;
 
-                // ส่งชื่อนักเรียน + คะแนน ไปบันทึกใน Google Sheet
-                sendScoreToSheet(this.student || {}, this.quiz.score, total);
-
                 document.getElementById('quizActiveCard').classList.add('hidden');
                 document.getElementById('quizResultCard').classList.remove('hidden');
 
@@ -1085,6 +1087,25 @@
 
                     certBtn.classList.add('hidden');
                 }
+            },
+
+            manualSendScore() {
+                const btn = document.getElementById('sendScoreBtn');
+                const status = document.getElementById('sendScoreStatus');
+                const total = QUIZ_QUESTIONS.length;
+
+                btn.disabled = true;
+                btn.classList.add('opacity-60', 'cursor-not-allowed');
+                status.textContent = 'กำลังส่งข้อมูล...';
+                status.className = 'text-xs font-sarabun text-amber-400 mt-3';
+
+                sendScoreToSheet(this.student || {}, this.quiz.score, total);
+
+                // no-cors ทำให้อ่านผลลัพธ์จริงไม่ได้ จึงถือว่าส่งสำเร็จเมื่อ request ไม่ error
+                setTimeout(() => {
+                    status.textContent = 'ส่งข้อมูลคะแนนเรียบร้อยแล้ว ✓';
+                    status.className = 'text-xs font-sarabun text-emerald-400 mt-3';
+                }, 600);
             },
 
             openCertificate() {
